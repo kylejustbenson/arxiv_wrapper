@@ -4,11 +4,7 @@ import os
 ###############################################################################
 # Ways to improve
 #   - byte buffer the files so they're not loaded to memory
-#
-# Extensibility
-# - To use these for automation, we'll need to download an initial query,
-#   parse it for citations, search for those citations, repeat
-
+#   - better error handling
 
 class arxiv_paper:
     def __init__(self, entry):
@@ -28,26 +24,29 @@ class arxiv_paper:
         self.details = ""
         self.download_link = ""
 
+        # Used to cleanup the conversion to ascii below
+        to_ascii = lambda x: x.encode('ascii', 'replace')
+
         if entry.get('title'):
-            self.title = entry['title'].encode('ascii', 'replace')
+            self.title = to_ascii(entry['title'])
         if entry.get('summary'):
-            self.abstract = entry['summary'].encode('ascii', 'replace')
+            self.abstract = to_ascii(entry['summary'])
         if entry.get('id'):
-            self.link = entry['id'].encode('ascii', 'replace')
+            self.link = to_ascii(entry['id'])
             self.id = self.link.split('/')[-1]
         if entry.get('arxiv_primary_category'):
-            self.category = entry['arxiv_primary_category']['term'].encode('ascii', 'replace')
+            self.category = to_ascii(entry['arxiv_primary_category']['term'])
         if entry.get('arxiv_journal_ref'):
-            self.journal = entry['arxiv_journal_ref'].encode('ascii', 'replace')
+            self.journal = to_ascii(entry['arxiv_journal_ref'])
         if entry.get('arxiv_comment'):
-            self.details = entry['arxiv_comment'].encode('ascii', 'replace')
+            self.details = to_ascii(entry['arxiv_comment'])
 
-        self.authors = [ info['name'].encode('ascii', 'replace') for info in entry['authors'] ]
+        self.authors = [ to_ascii(info['name']) for info in entry['authors'] ]
 
         # Finding link to pdf for downloading purposes
         for link in entry['links']:
             if link['type'] == u'application/pdf':
-                self.download_link = link['href'].encode('ascii', 'replace')
+                self.download_link = to_ascii(link['href'])
 
         # If link exists, parse it to where you can actually download it.
         # Original format wasn't working
@@ -155,4 +154,4 @@ if __name__ == '__main__':
     results = search(query="george", max_results=2, adv_search="title")
 
     for paper in results:
-        print paper.id
+        print paper
