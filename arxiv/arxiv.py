@@ -4,13 +4,7 @@ import os
 ###############################################################################
 # Ways to improve
 #   - byte buffer the files so they're not loaded to memory
-#   - Add fancier search to include:
-#       - ability to use id_list parameter to search by arXiv IDs
-#
-# Extensibility
-# - To use these for automation, we'll need to download an initial query,
-#   parse it for citations, search for those citations, repeat
-
+#   - better error handling
 
 class arxiv_paper:
     def __init__(self, entry):
@@ -24,30 +18,35 @@ class arxiv_paper:
         self.abstract = ""
         self.authors = []
         self.link = ""
+        self.id = ""
         self.category = ""
         self.journal = ""
         self.details = ""
         self.download_link = ""
 
-        if entry.get('title'):
-            self.title = entry['title']
-        if entry.get('summary'):
-            self.abstract = entry['summary']
-        if entry.get('id'):
-            self.link = entry['id']
-        if entry.get('arxiv_primary_category'):
-            self.category = entry['arxiv_primary_category']['term']
-        if entry.get('arxiv_journal_ref'):
-            self.journal = entry['arxiv_journal_ref']
-        if entry.get('arxiv_comment'):
-            self.details = entry['arxiv_comment']
+        # Used to cleanup the conversion to ascii below
+        to_ascii = lambda x: x.encode('ascii', 'replace')
 
-        self.authors = [ info['name'] for info in entry['authors'] ]
+        if entry.get('title'):
+            self.title = to_ascii(entry['title'])
+        if entry.get('summary'):
+            self.abstract = to_ascii(entry['summary'])
+        if entry.get('id'):
+            self.link = to_ascii(entry['id'])
+            self.id = self.link.split('/')[-1]
+        if entry.get('arxiv_primary_category'):
+            self.category = to_ascii(entry['arxiv_primary_category']['term'])
+        if entry.get('arxiv_journal_ref'):
+            self.journal = to_ascii(entry['arxiv_journal_ref'])
+        if entry.get('arxiv_comment'):
+            self.details = to_ascii(entry['arxiv_comment'])
+
+        self.authors = [ to_ascii(info['name']) for info in entry['authors'] ]
 
         # Finding link to pdf for downloading purposes
         for link in entry['links']:
             if link['type'] == u'application/pdf':
-                self.download_link = link['href']
+                self.download_link = to_ascii(link['href'])
 
         # If link exists, parse it to where you can actually download it.
         # Original format wasn't working
@@ -92,7 +91,8 @@ def search(query="", start=0, end=None, max_results=10, adv_search="all"):
     """
     Fills html query for arXiv.org search API
 
-    query           - (string) search query
+    query           - search query
+                        * string or list of strings if multiple ID query
     start           - index of found results to start at
     end             - index of found results to end at
     max_results     - Max number of results to return
@@ -125,8 +125,13 @@ def search(query="", start=0, end=None, max_results=10, adv_search="all"):
 
     # The ID must be section/id# for this to work
     if adv_search == "id":
+        # id query is either a single string or list of string ids
+        if type(query) == list:
+            max_results = len(query)
+            query = ",".join(query)
+
         q = "http://export.arxiv.org/api/query?"\
-                "search_query=all:%s&id_list=%s"%(query, query)
+                "id_list=%s&max_results=%d"%(query, max_results)
     # Non-ID query
     else:
         q = "http://export.arxiv.org/api/query?"\
