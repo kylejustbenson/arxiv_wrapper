@@ -4,8 +4,6 @@ import os
 ###############################################################################
 # Ways to improve
 #   - byte buffer the files so they're not loaded to memory
-#   - Add fancier search to include:
-#       - ability to use id_list parameter to search by arXiv IDs
 #
 # Extensibility
 # - To use these for automation, we'll need to download an initial query,
@@ -24,30 +22,32 @@ class arxiv_paper:
         self.abstract = ""
         self.authors = []
         self.link = ""
+        self.id = ""
         self.category = ""
         self.journal = ""
         self.details = ""
         self.download_link = ""
 
         if entry.get('title'):
-            self.title = entry['title']
+            self.title = entry['title'].encode('ascii', 'replace')
         if entry.get('summary'):
-            self.abstract = entry['summary']
+            self.abstract = entry['summary'].encode('ascii', 'replace')
         if entry.get('id'):
-            self.link = entry['id']
+            self.link = entry['id'].encode('ascii', 'replace')
+            self.id = self.link.split('/')[-1]
         if entry.get('arxiv_primary_category'):
-            self.category = entry['arxiv_primary_category']['term']
+            self.category = entry['arxiv_primary_category']['term'].encode('ascii', 'replace')
         if entry.get('arxiv_journal_ref'):
-            self.journal = entry['arxiv_journal_ref']
+            self.journal = entry['arxiv_journal_ref'].encode('ascii', 'replace')
         if entry.get('arxiv_comment'):
-            self.details = entry['arxiv_comment']
+            self.details = entry['arxiv_comment'].encode('ascii', 'replace')
 
-        self.authors = [ info['name'] for info in entry['authors'] ]
+        self.authors = [ info['name'].encode('ascii', 'replace') for info in entry['authors'] ]
 
         # Finding link to pdf for downloading purposes
         for link in entry['links']:
             if link['type'] == u'application/pdf':
-                self.download_link = link['href']
+                self.download_link = link['href'].encode('ascii', 'replace')
 
         # If link exists, parse it to where you can actually download it.
         # Original format wasn't working
@@ -92,7 +92,8 @@ def search(query="", start=0, end=None, max_results=10, adv_search="all"):
     """
     Fills html query for arXiv.org search API
 
-    query           - (string) search query
+    query           - search query
+                        * string or list of strings if multiple ID query
     start           - index of found results to start at
     end             - index of found results to end at
     max_results     - Max number of results to return
@@ -125,8 +126,13 @@ def search(query="", start=0, end=None, max_results=10, adv_search="all"):
 
     # The ID must be section/id# for this to work
     if adv_search == "id":
+        # id query is either a single string or list of string ids
+        if type(query) == list:
+            max_results = len(query)
+            query = ",".join(query)
+
         q = "http://export.arxiv.org/api/query?"\
-                "search_query=all:%s&id_list=%s"%(query, query)
+                "id_list=%s&max_results=%d"%(query, max_results)
     # Non-ID query
     else:
         q = "http://export.arxiv.org/api/query?"\
@@ -149,4 +155,4 @@ if __name__ == '__main__':
     results = search(query="george", max_results=2, adv_search="title")
 
     for paper in results:
-        print paper
+        print paper.id
