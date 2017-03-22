@@ -86,7 +86,6 @@ class arxiv_paper:
     def __repr__(self):
         return self.__str__()
 
-# Basic search right now. We can get fancier with the api if we want
 def search(query, start=0, end=None, max_results=10, adv_search="all"):
     """
     Fills html query for arXiv.org search API
@@ -96,7 +95,7 @@ def search(query, start=0, end=None, max_results=10, adv_search="all"):
     start           - index of found results to start at
     end             - index of found results to end at
     max_results     - Max number of results to return
-    adv_search      - see docs
+    adv_search      - see README
 
     returns list of arxiv_papers
     """
