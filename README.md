@@ -28,12 +28,12 @@ results = arxiv.search("George", max_results=2, adv_search="title")
 ```
 Returns the query for titles of articles including "George" with a max of 2 results
 
-See the [https://arxiv.org/help/api/user-manual](arXiv documentation) for details on what else you are able to do and how to utilize the `start`, `end`, and `max_results` parameters.
+See the [arXiv documentation](https://arxiv.org/help/api/user-manual) for details on what else you are able to do and how to utilize the `start`, `end`, and `max_results` parameters.
 
 Once you know what is possible, see the Advanced Search section below to get details on how to utilize `adv_search` parameter.
 
 ## Advanced Search
-As I hope you've read about in the [https://arxiv.org/help/api/user-manual](arXiv documentation), you are able to utilize more advanced queries. To specify these in your search, send the `adv_search` parameter easily allows you to do this. Below is a list of the possible values for `adv_search`:
+As I hope you've read about in the [arXiv documentation](https://arxiv.org/help/api/user-manual), you are able to utilize more advanced queries. To specify these in your search, send the `adv_search` parameter easily allows you to do this. Below is a list of the possible values for `adv_search`:
 
 * all
 	- Searches for `query` in all of arXiv
@@ -54,7 +54,15 @@ As I hope you've read about in the [https://arxiv.org/help/api/user-manual](arXi
 * id
 	- See id search notes below
 
-The `adv_search` option 'id' changes the way you must specify the query. FINISH
+### id Search
+Using the `adv_search` option 'id' you can either send a single id in the form of a string, or you can send a list of string ids through the query parameter.
+
+```python
+results = search(['hep-th/0012018', 'hep-th/9901023'])
+```
+Returns the metadata for the two papers specified by those ids. 
+
+Take notice of that format for ids! arXiv ids are unique to each category rather than the enture archive itself. So make sure when doing id searches, you include the category of the paper.
 
 ## Summary of arXiv metadata when parsed with feedparser
 
