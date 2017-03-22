@@ -87,7 +87,7 @@ class arxiv_paper:
         return self.__str__()
 
 # Basic search right now. We can get fancier with the api if we want
-def search(query="", start=0, end=None, max_results=10, adv_search="all"):
+def search(query, start=0, end=None, max_results=10, adv_search="all"):
     """
     Fills html query for arXiv.org search API
 
@@ -148,10 +148,3 @@ def search(query="", start=0, end=None, max_results=10, adv_search="all"):
         papers.append( arxiv_paper(entry) )
 
     return papers
-
-
-if __name__ == '__main__':
-    results = search(query="george", max_results=2, adv_search="title")
-
-    for paper in results:
-        print paper
