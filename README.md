@@ -58,7 +58,7 @@ As I hope you've read about in the [arXiv documentation](https://arxiv.org/help/
 Using the `adv_search` option 'id' you can either send a single id in the form of a string, or you can send a list of string ids through the query parameter.
 
 ```python
-results = search(['hep-th/0012018', 'hep-th/9901023'])
+results = search(['hep-th/0012018', 'hep-th/9901023'], adv_search='id')
 ```
 Returns the metadata for the two papers specified by those ids. 
 
