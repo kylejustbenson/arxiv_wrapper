@@ -62,7 +62,7 @@ results = search(['hep-th/0012018', 'hep-th/9901023'], adv_search='id')
 ```
 Returns the metadata for the two papers specified by those ids. 
 
-Take notice of that format for ids! arXiv ids are unique to each category rather than the enture archive itself. So make sure when doing id searches, you include the category of the paper.
+Take note of the exact id you are searching for. Some arXiv ids have a subject prepended, others don't. Some have a '.' in the middle, most do not. So, the search only works if you know for sure the id of the paper you are looking for including these oddities.
 
 ## Summary of arXiv metadata when parsed with feedparser
 
